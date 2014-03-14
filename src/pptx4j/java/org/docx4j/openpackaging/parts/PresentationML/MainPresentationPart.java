@@ -1,19 +1,19 @@
 /*
  *  Copyright 2007-2008, Plutext Pty Ltd.
- *   
+ *
  *  This file is part of docx4j.
 
-    docx4j is licensed under the Apache License, Version 2.0 (the "License"); 
-    you may not use this file except in compliance with the License. 
+    docx4j is licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
 
-    You may obtain a copy of the License at 
+    You may obtain a copy of the License at
 
-        http://www.apache.org/licenses/LICENSE-2.0 
+        http://www.apache.org/licenses/LICENSE-2.0
 
-    Unless required by applicable law or agreed to in writing, software 
-    distributed under the License is distributed on an "AS IS" BASIS, 
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-    See the License for the specific language governing permissions and 
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
     limitations under the License.
 
  */
@@ -44,7 +44,7 @@ import org.pptx4j.pml.Presentation.SldIdLst.SldId;
 
 
 public final class MainPresentationPart extends JaxbPmlPart<Presentation> {
-	
+
 	public MainPresentationPart(PartName partName) throws InvalidFormatException {
 		super(partName);
 		init();
@@ -54,21 +54,21 @@ public final class MainPresentationPart extends JaxbPmlPart<Presentation> {
 		super(new PartName("/ppt/presentation.xml"));
 		init();
 	}
-	
-	public void init() {		
-		// Used if this Part is added to [Content_Types].xml 
-		setContentType(new  org.docx4j.openpackaging.contenttype.ContentType( 
+
+	public void init() {
+		// Used if this Part is added to [Content_Types].xml
+		setContentType(new  org.docx4j.openpackaging.contenttype.ContentType(
 				org.docx4j.openpackaging.contenttype.ContentTypes.PRESENTATIONML_MAIN));
 
-		// Used when this Part is added to a rels 
+		// Used when this Part is added to a rels
 		setRelationshipType(Namespaces.PRESENTATIONML_MAIN);
-		
+
 	}
-	
+
 	private final static String DEFAULT_SLIDE_SIZE = "<p:sldSz xmlns:p=\"http://schemas.openxmlformats.org/presentationml/2006/main\"" +
 			" cx=\"9144000\" cy=\"6858000\" type=\"screen4x3\"/>";
-	
-	
+
+
 	private final static String DEFAULT_NOTES_SIZE = "<p:notesSz xmlns:p=\"http://schemas.openxmlformats.org/presentationml/2006/main\" " +
 			"cx=\"6858000\" cy=\"9144000\"/>";
 
@@ -231,40 +231,40 @@ public final class MainPresentationPart extends JaxbPmlPart<Presentation> {
 	}
 
 	public static Presentation createJaxbPresentationElement() throws JAXBException {
-		
+
 		return createJaxbPresentationElement(null, true);
 	}
-	
+
 	/**
 	 * @since 2.7
-	 */	
+	 */
 	public static Presentation createJaxbPresentationElement(SlideSizesWellKnown sz, boolean landscape) throws JAXBException {
 
-		ObjectFactory factory = Context.getpmlObjectFactory(); 
+		ObjectFactory factory = Context.getpmlObjectFactory();
 		Presentation presentation = factory.createPresentation();
 
 		// Create empty lists
 		Presentation.SldMasterIdLst masterIds = factory.createPresentationSldMasterIdLst();
-		Presentation.SldIdLst slideIds = factory.createPresentationSldIdLst();		
+		Presentation.SldIdLst slideIds = factory.createPresentationSldIdLst();
 		presentation.setSldMasterIdLst(masterIds);
 		presentation.setSldIdLst(slideIds);
-		
-		presentation.setNotesSz( 
+
+		presentation.setNotesSz(
 				(CTPositiveSize2D)XmlUtils.unmarshalString(DEFAULT_NOTES_SIZE, Context.jcPML, CTPositiveSize2D.class) );
-		
+
 		if (sz==null) {
 			presentation.setSldSz(
 					(Presentation.SldSz)XmlUtils.unmarshalString(DEFAULT_SLIDE_SIZE, Context.jcPML, Presentation.SldSz.class));
 		} else {
-			presentation.setSldSz(	MainPresentationPart.createSlideSize(sz, landscape) );		
+			presentation.setSldSz(	MainPresentationPart.createSlideSize(sz, landscape) );
 		}
 		return presentation;
 	}
 
-	
+
 	/**
 	 * Add a slide to this presentation.
-	 * 
+	 *
 	 * @param slidePart
 	 * @return
 	 * @throws InvalidFormatException
@@ -273,43 +273,43 @@ public final class MainPresentationPart extends JaxbPmlPart<Presentation> {
 		return addSlideIdListEntry(slidePart, AddPartBehaviour.OVERWRITE_IF_NAME_EXISTS);
 	}
 
-	
+
 	/**
 	 * @since 2.8.1
-	 */	
-	@Deprecated 
-	public Presentation.SldIdLst.SldId addSlideIdListEntry(SlidePart slidePart, AddPartBehaviour mode) 
-		throws InvalidFormatException {	
+	 */
+	@Deprecated
+	public Presentation.SldIdLst.SldId addSlideIdListEntry(SlidePart slidePart, AddPartBehaviour mode)
+		throws InvalidFormatException {
 
 		Relationship rel = this.addTargetPart(slidePart, mode);
-		
+
 		Presentation.SldIdLst.SldId entry = Context.getpmlObjectFactory().createPresentationSldIdLstSldId();
-		
+
 		entry.setId( this.getSlideId() );
 		entry.setRid(rel.getId());
-		
+
 		this.getJaxbElement().getSldIdLst().getSldId().add(entry);
-		
+
 		return entry;
-		
+
 	}
-	
-	public Presentation.SldMasterIdLst.SldMasterId addSlideMasterIdListEntry(SlideMasterPart slideMasterPart) 
-		throws InvalidFormatException {	
+
+	public Presentation.SldMasterIdLst.SldMasterId addSlideMasterIdListEntry(SlideMasterPart slideMasterPart)
+		throws InvalidFormatException {
 
 		Relationship rel = this.addTargetPart(slideMasterPart);
-		
+
 		Presentation.SldMasterIdLst.SldMasterId entry = Context.getpmlObjectFactory().createPresentationSldMasterIdLstSldMasterId();
-		
+
 		entry.setId( new Long(this.getSlideLayoutOrMasterId()) );
 		entry.setRid(rel.getId());
 
 		this.getJaxbElement().getSldMasterIdLst().getSldMasterId().add(entry);
-		
+
 		return entry;
-			
+
 		}
-	
+
 	/**
 	 * Append the slide at the end of the presentation.
 	 * @param slidePart
@@ -317,21 +317,21 @@ public final class MainPresentationPart extends JaxbPmlPart<Presentation> {
 	 * @since 3.0
 	 */
 	public boolean addSlide(SlidePart slidePart) throws Pptx4jException {
-		
+
 		/* Powerpoint 2010 can't open a pptx in which a slide appears
 		 * several times, for example:
-		 * 
+		 *
 			  <p:sldIdLst>
 			    <p:sldId id="256" r:id="rId2"/>
 			    <p:sldId id="257" r:id="rId3"/>
 			    <p:sldId id="258" r:id="rId2"/> <----- can't use rId2 again
-			  </p:sldIdLst>		
-		 * 
+			  </p:sldIdLst>
+		 *
 		 * Nor can 2 distinct relIds target the same part.
 		 */
-		
+
 		try {
-			Relationship rel = this.addTargetPart(slidePart, AddPartBehaviour.RENAME_IF_NAME_EXISTS);
+			Relationship rel = this.addTargetPart(slidePart, AddPartBehaviour.RENAME_IF_NAME_EXISTS, slidePart.getPartName().getName());
 			return this.getJaxbElement().getSldIdLst().getSldId().add(createSlideIdListEntry(rel));
 		} catch (InvalidFormatException e) {
 			throw new Pptx4jException(e.getMessage(), e);
@@ -339,10 +339,10 @@ public final class MainPresentationPart extends JaxbPmlPart<Presentation> {
 	}
 
 	/**
-	 * Inserts the slide at the specified position in the presentation. 
-	 * Shifts the element currently at that position (if any) and any subsequent elements to the 
+	 * Inserts the slide at the specified position in the presentation.
+	 * Shifts the element currently at that position (if any) and any subsequent elements to the
 	 * right (adds one to their indices).
-	 * 
+	 *
 	 * @param index
 	 * @param slidePart
 	 * @throws Pptx4jException
@@ -351,13 +351,13 @@ public final class MainPresentationPart extends JaxbPmlPart<Presentation> {
 	public void addSlide(int index, SlidePart slidePart) throws Pptx4jException {
 
 		List<SldId> sldIds = this.getJaxbElement().getSldIdLst().getSldId();
-		
-		int zeroBasedCount = sldIds.size(); 
+
+		int zeroBasedCount = sldIds.size();
 
 		if (index< 0 || index>zeroBasedCount) {
-			throw new Pptx4jException("Can't add slide at index " + index + ".  (There are " + sldIds.size() + " slides) ");			
+			throw new Pptx4jException("Can't add slide at index " + index + ".  (There are " + sldIds.size() + " slides) ");
 		}
-		
+
 		try {
 			Relationship rel = this.addTargetPart(slidePart, AddPartBehaviour.RENAME_IF_NAME_EXISTS);
 			sldIds.add(index, createSlideIdListEntry(rel));
@@ -365,82 +365,82 @@ public final class MainPresentationPart extends JaxbPmlPart<Presentation> {
 			throw new Pptx4jException(e.getMessage(), e);
 		}
 	}
-	
-	private Presentation.SldIdLst.SldId createSlideIdListEntry(Relationship rel) throws InvalidFormatException {	
-			
+
+	private Presentation.SldIdLst.SldId createSlideIdListEntry(Relationship rel) throws InvalidFormatException {
+
 		Presentation.SldIdLst.SldId entry = Context.getpmlObjectFactory().createPresentationSldIdLstSldId();
-		
+
 		entry.setId( this.getSlideId() );
 		entry.setRid(rel.getId());
-		
+
 		return entry;
 	}
-	
+
 	/**
 	 * @param index
-	 * @throws Pptx4jException 
+	 * @throws Pptx4jException
 	 * @since 3.0
 	 */
 	public void removeSlide(int index) throws Pptx4jException {
-		
+
 		List<SldId> sldIds = this.getJaxbElement().getSldIdLst().getSldId();
-		
-		int zeroBasedCount = sldIds.size() -1; 
+
+		int zeroBasedCount = sldIds.size() -1;
 
 		if (index< 0 || index>zeroBasedCount) {
-			throw new Pptx4jException("No slide at index " + index + ".  (There are " + sldIds.size() + " slides) ");			
+			throw new Pptx4jException("No slide at index " + index + ".  (There are " + sldIds.size() + " slides) ");
 		}
-		
+
 		Presentation.SldIdLst.SldId entry = this.getJaxbElement().getSldIdLst().getSldId().remove(index);
-		
+
 		Relationship rel = this.getRelationshipsPart().getRelationshipByID(entry.getRid());
-		
+
 		Part part = this.getRelationshipsPart().getPart(rel);
-		
+
 		this.getPackage().getParts().remove(part.getPartName());
 		this.getRelationshipsPart().removeRelationship(rel);
 	}
-	
+
 	/**
 	 * @param rel
-	 * @throws Pptx4jException 
+	 * @throws Pptx4jException
 	 * @since 3.0
 	 */
 	public void removeSlide(Relationship rel) throws Pptx4jException {
-		
+
 		if (rel==null) throw new Pptx4jException("Null relationship.");
-		
+
 		int index = -1;
 		int i=0;
 		for (Presentation.SldIdLst.SldId entry : this.getJaxbElement().getSldIdLst().getSldId()) {
-			
+
 			if (entry.getRid().equals(rel.getId())) {
 				index = i;
 				break;
 			}
 			i++;
 		}
-		
+
 		if (index>-1) {
 			removeSlide(index);
 		} else {
 			throw new Pptx4jException("No slide is the target of that relationship.");
 		}
 	}
-	
+
 	/**
 	 * @param index
-	 * @throws Pptx4jException 
+	 * @throws Pptx4jException
 	 * @since 3.0.1
 	 */
 	public SlidePart getSlide(int index) throws Pptx4jException {
-		
+
 		List<SldId> sldIds = this.getJaxbElement().getSldIdLst().getSldId();
-		
-		int zeroBasedCount = sldIds.size() -1; 
+
+		int zeroBasedCount = sldIds.size() -1;
 
 		if (index< 0 || index>zeroBasedCount) {
-			throw new Pptx4jException("No slide at index " + index + ".  (There are " + sldIds.size() + " slides) ");			
+			throw new Pptx4jException("No slide at index " + index + ".  (There are " + sldIds.size() + " slides) ");
 		}
 
 		try {
@@ -449,9 +449,9 @@ public final class MainPresentationPart extends JaxbPmlPart<Presentation> {
 		} catch (Exception e) {
 			throw new Pptx4jException("Slide " + index + " not found", e);
 		}
-		
+
 	}
-	
-	
-	
+
+
+
 }
